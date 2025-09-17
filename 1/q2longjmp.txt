@@ -1,0 +1,31 @@
+2b.)
+
+i.)
+The output which is different is the number of times in which the destructor was called. 
+In the case of try/catch the stack must be walked to check for a corresponding catch block 
+and have the destructors called for the struct T object. In the case of the setjmp/longjmp
+a direct-nonlocal transfer occurs and the stack is not unwound, thus the destructors are not called 
+
+ii.) 
+
+O0:
+
+q2throwcatch: 7.,72u
+q2longjmp: 1.76u
+
+O2: 
+q2throwcatch: 7.16u
+
+q2longjmp: 1.50u
+
+
+iii.) 
+The original is over 4 times as slow for the origianl program as compared to the 
+modified program using jumps. This is due to the O(n) walk of the stack in the original case 
+due to the need to find the topmost corresponding catch block when an exception is thrown 
+as well as the need to call possible destructors for each stack frame. In the modified program 
+a direct non-local transfer is made and no walk of the stack needs to be done. 
+
+iv.)
+With compiler optimizations both programs exhibit better performance, however the 
+magnitude difference between the original and altered program stays about the same. 

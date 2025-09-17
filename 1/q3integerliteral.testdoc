@@ -1,0 +1,62 @@
+#Layer 1
+
+
+## Inputs: 
+bin/q3integerliteral 01123laf
+bin/q3integerliteral contains_above.txt 
+bin/q3integerliteral DNE.txt 
+bin/q3integerliteral chmod000.txt
+
+
+## Outputs:
+"01123laf" : "01123la" no -- extraneous characters "f"
+"01123laf" : "01123la" no -- extraneous characters "f"
+File does not exist or cant be opened: DNE.txt
+File does not exist or cant be opened: chmod000.txt
+
+## Justifications: 
+- Using CLI in REPL style taking from standard input
+- Specify input file with the same input text produces the same output as using stdin
+- Error message for a file which does not exist
+- Error message for a file which does not provide read permissions
+
+
+
+# Layer 2
+
+
+## Inputs: 
+2839492af0
+0123'45'6'7'1'2'3'4'5671
+0b1010101'
+12313123ull
+99203l2342
+
+## Outputs: 
+"2839492af0" : "2839492a" no -- extraneous characters "f0"
+"0123'45'6'7'1'2'3'4'5671" : "0123'45'6'7'1'2'3'4'5671" yes, value 5744370502585
+"0b1010101'" : "0b1010101'" no
+"12313123ull" : "12313123ul" yes, value 12313123 -- extraneous characters "l"
+"99203l2342" : "99203l2" no -- extraneous characters "342"
+
+## Justifications: 
+- Shows program resumes execution with implicit state (memory) of whether it was parsing 
+  a decimal or hexadecimal sequence. The letters are valid hexadecimal, however, non-valid decimal
+  which the program correctly rejects given the sequence did not start with "0x"
+
+- Shows maximum digit conditional being correctly accepted despite more characters than 23
+  which is the limit of digits for octal literals. Program keeps track of current digit count.
+  Shows quotes do not count towards the digit count limit and is thus correctly accepted. 
+  Also a large number shows that overflow has not occurred when converting to decimal.
+
+- Shows that quote (') must be placed between two digits, program checks to ensure the
+  that the character following the quote must be a digit and cannot be EOT or integer suffixes
+
+- Shows program immediately recognizes a sequence ending in "ul as valid, and anything following is extraneous
+  It's important to show that it does not reject the string because no more possible characters could follow 
+  and thus the integer literal is complete and the program returns a match. Anything following is extraneous 
+
+- Shows the program checks that the unsigned or long suffixes are the digits following 
+  "u" or "l" should be each other respectively or EOT. The program tracks that "l" has 
+  previously been entered and the next token should be "u" or EOT.
+

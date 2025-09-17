@@ -1,0 +1,91 @@
+1b) 
+i.)
+default (O0) optimization:
+
+q1exception: 4.30u
+q1returnglobal: 4.63u 
+q1returntype: 17.83u
+q1returntypec: 4.59u
+
+O2 optimization: 
+q1exception: 3.50u
+q1returnglobal: 3.76u 
+q1returntype: 4.94u
+q1returntypec: 3.80u
+
+ii.) 
+The original program uses exceptions and try/catch blocks. The cost of entry on guarded-block entry is zero, where 
+the cost is deffered to the raise (which happens at a frequency of 1/10000) in this program. 
+This makes it so the most frequent case has no cost, with the cost only being taken in 0.01% of cases.
+
+Compared to the second program uses global flags, global flags incur overhead in checks of the flag variable and set/reset. 
+This cost is incurred on every iteration of the loop.This makes the second program slower by a small amount.
+
+The third program uses std::variant. Using a union of return types requires enlaring the type range 
+and requires probing the return value for the correct type before use. This requires additional 
+if statement similar to the case of using the global flags. The unoptimized version runs for significantly longer, 
+and can be attributed to extra checks for type, then value, and the overhead of using std::variant
+which can increase boilerplate, and has overhead for type safety.
+
+The fourth program uses the tagged union, and exhibits a similar performance to the use of flags. 
+Enums are syntactic sugar and their underlying representation are integers, so their overhead is low. 
+Compared to std::variant which exhibits similar logic, the tagged union does not have an associate cost 
+for construction/destruction.
+
+iii.)
+original sees some small performance improvements. Perhaps some loop optimizations
+
+Compared to second program, which also sees some small improvements. Still worse performance 
+than the try/catch program, which is to be expected from the above. similarly loop optimization can be made 
+
+The program using std::variant sees massive improvement after including O2 optimization. The compiler 
+may perform dead code elimination (DCE) and inline jumps. The performance is still worse than the above 
+two methods, but has drastically improved from the unoptimized version 
+
+Similarly sees small improvment from unoptimized, and comparable to the use of global flags. It may be the fact 
+that both the version using global flags and this version experienced similar compiler optimizations.
+
+
+1c.)
+
+i.)
+
+eperiod: 500 
+q1exception: 3.91u
+q1returnglobal: 3.39u
+q1returntype: 4.43u
+q1returntypec: 3.34u
+
+
+eperiod: 50 
+q1exception: 8.28u
+q1returnglobal: 3.38u
+q1returntype: 4.37u
+q1returntypec: 3.36u
+
+eperiod: 25 
+q1exception: 13.90u
+q1returnglobal: 3.32u
+q1returntype: 4.35u
+q1returntypec: 3.35u
+
+eperiod: 12:
+q1exception: 13.33u
+q1returnglobal: 3.26u
+q1returntype: 4.32u
+q1returntypec: 3.34u
+
+ii.) 
+
+as the exception period decreases, the program generally takes longer for the program 
+using try/catch exception handling. This is attributed to the zero-cost of entering the 
+guarded block, but expensive on raising the exception due to the O(n) walking of the stack 
+to call destructors. Since the period decreases, the number of raised exceptions increases.
+
+In the case of the other three mechanisms (global flags, std::variant, tagged union), 
+there is little to no change in the different exception periods. This is since the same 
+type/value checking happens regardless of if an exception is raised or not, so altering the period 
+does not siginificantly change the amount of computation needed. Particularly in the case of 
+the q1returntypec.c program, static multi-level exits are used, in an OOP language like C++, this 
+would require walking of the stack. However, in C a non OOP language, no stack alk is necessary
+since no destructors need to be checked for on each stack frame.
