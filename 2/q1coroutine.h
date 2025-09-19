@@ -1,12 +1,10 @@
 #ifndef Q1COROUTINE_H
 #define Q1COROUTINE_H
 
+#include "q1helper.h"
 #include <fstream> 
 
-enum class CaseOption{
-	LOWER, 
-	UPPER
-};
+
 
 constexpr int MAX_WORD = 100;
 

@@ -90,8 +90,8 @@ int main(int argc, char* argv[]){
 
 	pipeline.push_back(new Writer{*outfile});
 
-	for(const auto& c: options){
-		switch(c){
+	for(int i = options.size() - 1; i >= 0; i--){
+		switch(options[i]){
 		case 'u': 				// Denoted case -c u as 'u' char above
 			pipeline.push_back(new Case{pipeline.back(), CaseOption::UPPER});
 			break;
