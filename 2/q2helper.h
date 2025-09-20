@@ -3,6 +3,7 @@
 
 #include <uPRNG.h>
 
+// intmax_t convert( const char * str );			// convert C string to integer
 inline constexpr int DEFAULT_GAMES = 5;
 struct cmd_err{};
 struct seed_cmd_err{};

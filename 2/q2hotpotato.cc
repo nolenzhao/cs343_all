@@ -3,13 +3,14 @@
 #include <iostream> 
 #include <unistd.h>
 
+
 int main(int argc, char* argv[]){
 
 
-	PRNG sprng;
+	PRNG sprng1, sprng2, sprng3;
 	intmax_t seed = getpid();
-	int games = DEFAULT_GAMES;
-	int players = 0;
+	int num_games = DEFAULT_GAMES;
+	int num_players = 0;
 
 	try{
 		switch(argc){
@@ -21,7 +22,9 @@ int main(int argc, char* argv[]){
 				}
 				seed = seed_arg;
 			}
-			sprng.set_seed(seed);
+			sprng1.set_seed(seed);
+			sprng2.set_seed(seed);
+			sprng3.set_seed(seed);
 
 		case 3: 
 			if(strcmp(argv[2], "d") != 0){
@@ -29,10 +32,10 @@ int main(int argc, char* argv[]){
 				if(players_arg <= 0 || players_arg > 50){
 					throw player_cmd_err{};
 				}
-				players = players_arg
+				num_players = players_arg;
 			}
 			else{
-				players = sprng(1, 50);
+				num_players = sprng1(1, 50);
 			}
 		case 2: 
 			if(strcmp(argv[1], "d") != 0){
@@ -40,6 +43,7 @@ int main(int argc, char* argv[]){
 				if(games_arg < 0 || games_arg > 50){
 					throw game_cmd_err{};
 				}
+				num_games = games_arg;
 			}
 		case 1: 
 			break;
@@ -53,7 +57,7 @@ int main(int argc, char* argv[]){
 	}
 	catch(player_cmd_err&){
 		std::cerr << "Must have at least one player and 50 players or less\n";
-		eixt(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 	catch(game_cmd_err& ){
 		std::cerr << "Game value must be between 0 and 50 inclusive\n";
@@ -63,6 +67,41 @@ int main(int argc, char* argv[]){
 		std::cerr << "Unknown or insufficient command arguments\n";
 		exit(EXIT_FAILURE);
 	}
+
+	Potato potato{sprng2};
+
+	std::vector<Player*>players;
+
+	for(unsigned int id = 0; id < players.size(); id++){
+		players.push_back(new Player{sprng3, id, potato});
+	}
+
+	/*
+	Set the zero player to the umpire in the case that there is only one player, 
+	but also to swap in the following when a random index is generated
+	*/
+	Player::umpire = players[0];
+
+	/*
+	Generate a random player index [1, players-1] swap, that with position 0
+	Then do a scan through to check for id zero and set that to umpire;
+	*/
+	if(players.size() > 1){
+		int swap_idx = sprng1(1, players.size() - 1);
+		players[0] = players[swap_idx];
+		players[swap_idx] = Player::umpire;		// Set zero id player as umpire
+	}
+
+	for(int i = 0; i < players.size(); i++){
+		int prev = (i - 1 + players.size()) % players.size();
+		int next = (i + 1) % players.size();
+		players[i]->init(*players[prev], *players[next]);
+	}
+
+	Player::umpire->toss();								// Start the game 
+
+
+
 
 
 
